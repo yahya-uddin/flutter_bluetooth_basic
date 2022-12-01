@@ -147,7 +147,7 @@ public class DeviceConnFactoryManager {
      *
      * @return
      */
-    public void openPort() {
+    public boolean openPort() {
         deviceConnFactoryManagers[id].isOpenPort = false;
 
         switch (deviceConnFactoryManagers[id].connMethod) {
@@ -178,8 +178,9 @@ public class DeviceConnFactoryManager {
             if (this.mPort != null) {
                 this.mPort=null;
             }
-
         }
+
+        return isOpenPort;
     }
 
     /**

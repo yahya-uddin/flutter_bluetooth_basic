@@ -15,8 +15,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.util.Log;
+
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.EventChannel.EventSink;
 import io.flutter.plugin.common.EventChannel.StreamHandler;
@@ -26,12 +34,6 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
 
 /** FlutterBluetoothBasicPlugin */
 public class FlutterBluetoothBasicPlugin implements MethodCallHandler, RequestPermissionsResultListener {
@@ -213,7 +215,7 @@ public class FlutterBluetoothBasicPlugin implements MethodCallHandler, RequestPe
     if(scanner != null) scanner.stopScan(mScanCallback);
   }
 
-  private void connect(Result result, Map<String, Object> args) {
+  private void connect(final Result result, Map<String, Object> args) {
     if (args.containsKey("address")) {
       String address = (String) args.get("address");
       disconnect();
@@ -230,11 +232,11 @@ public class FlutterBluetoothBasicPlugin implements MethodCallHandler, RequestPe
       threadPool.addSerialTask(new Runnable() {
         @Override
         public void run() {
-          DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].openPort();
+          final DeviceConnFactoryManager deviceConnFactoryManager =
+                  DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id];
+          result.success(deviceConnFactoryManager.openPort());
         }
       });
-
-      result.success(true);
     } else {
       result.error("invalid_argument", "Argument 'address' not found", null);
     }
@@ -244,12 +246,10 @@ public class FlutterBluetoothBasicPlugin implements MethodCallHandler, RequestPe
   /**
    * Reconnect to recycle the last connected object to avoid memory leaks
    */
-  private boolean disconnect(){
-
-    if(DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id]!=null&&DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].mPort!=null) {
-      DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].reader.cancel();
-      DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].mPort.closePort();
-      DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].mPort=null;
+  private boolean disconnect() {
+    DeviceConnFactoryManager deviceConnFactoryManager = DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id];
+    if (deviceConnFactoryManager != null) { // && deviceConnFactoryManager.mPort != null
+      deviceConnFactoryManager.closePort(id);
     }
     return true;
   }
@@ -264,7 +264,7 @@ public class FlutterBluetoothBasicPlugin implements MethodCallHandler, RequestPe
   }
 
   @SuppressWarnings("unchecked")
-  private void writeData(Result result, Map<String, Object> args) {
+  private void writeData(final Result result, Map<String, Object> args) {
     if (args.containsKey("bytes")) {
       final ArrayList<Integer> bytes = (ArrayList<Integer>)args.get("bytes");
 
@@ -279,6 +279,7 @@ public class FlutterBluetoothBasicPlugin implements MethodCallHandler, RequestPe
           }
 
           DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].sendDataImmediately(vectorData);
+          result.success(true);
         }
       });
     } else {

@@ -15,6 +15,7 @@ class BluetoothManager {
       const MethodChannel('$NAMESPACE/methods');
   static const EventChannel _stateChannel =
       const EventChannel('$NAMESPACE/state');
+
   Stream<MethodCall> get _methodStream => _methodStreamController.stream;
   final StreamController<MethodCall> _methodStreamController =
       StreamController.broadcast();
@@ -40,10 +41,12 @@ class BluetoothManager {
       await _channel.invokeMethod('isConnected');
 
   BehaviorSubject<bool> _isScanning = BehaviorSubject.seeded(false);
+
   Stream<bool> get isScanning => _isScanning.stream;
 
   BehaviorSubject<List<BluetoothDevice>> _scanResults =
       BehaviorSubject.seeded([]);
+
   Stream<List<BluetoothDevice>> get scanResults => _scanResults.stream;
 
   PublishSubject _stopScanPill = new PublishSubject();
@@ -124,20 +127,18 @@ class BluetoothManager {
     _isScanning.add(false);
   }
 
-  Future<dynamic> connect(BluetoothDevice device) =>
-      _channel.invokeMethod('connect', device.toJson());
+  Future<dynamic> connect(BluetoothDevice device) async =>
+      await _channel.invokeMethod('connect', device.toJson());
 
-  Future<dynamic> disconnect() => _channel.invokeMethod('disconnect');
+  Future<dynamic> disconnect() async =>
+      await _channel.invokeMethod('disconnect');
 
-  Future<dynamic> destroy() => _channel.invokeMethod('destroy');
+  Future<dynamic> destroy() async => await _channel.invokeMethod('destroy');
 
-  Future<dynamic> writeData(List<int> bytes) {
+  Future<dynamic> writeData(List<int> bytes) async {
     Map<String, Object> args = Map();
     args['bytes'] = bytes;
     args['length'] = bytes.length;
-
-    _channel.invokeMethod('writeData', args);
-
-    return Future.value(true);
+    return await _channel.invokeMethod('writeData', args);
   }
 }
