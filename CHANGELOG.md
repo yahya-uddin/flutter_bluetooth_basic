@@ -1,3 +1,8 @@
+## 0.2.0
+
+- Bug-fix when disconnecting
+- Return success status, when connecting, disconnecting and writing data
+
 ## 0.1.7
 
 - Fix null Exception at _$BluetoothDeviceFromJson and BluetoothManager.state (PR https://github.com/andrey-ushakov/flutter_bluetooth_basic/pull/26).
