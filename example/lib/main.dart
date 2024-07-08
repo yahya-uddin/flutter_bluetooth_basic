@@ -38,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((_) => initBluetooth());
+    WidgetsBinding.instance.addPostFrameCallback((_) => initBluetooth());
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
