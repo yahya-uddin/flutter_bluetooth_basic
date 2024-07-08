@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 // import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
 
   @override
@@ -31,14 +32,13 @@ class _MyHomePageState extends State<MyHomePage> {
   BluetoothManager bluetoothManager = BluetoothManager.instance;
 
   bool _connected = false;
-  BluetoothDevice _device;
+  BluetoothDevice? _device;
   String tips = 'no device connect';
 
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) => initBluetooth());
+    WidgetsBinding.instance!.addPostFrameCallback((_) => initBluetooth());
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -78,8 +78,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _onConnect() async {
-    if (_device != null && _device.address != null) {
-      await bluetoothManager.connect(_device);
+    if (_device != null && _device!.address != null) {
+      await bluetoothManager.connect(_device!);
     } else {
       setState(() {
         tips = 'please select device';
@@ -129,17 +129,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 stream: bluetoothManager.scanResults,
                 initialData: [],
                 builder: (c, snapshot) => Column(
-                  children: snapshot.data
+                  children: snapshot.data!
                       .map((d) => ListTile(
                             title: Text(d.name ?? ''),
-                            subtitle: Text(d.address),
+                            subtitle: Text(d.address ?? ''),
                             onTap: () async {
                               setState(() {
                                 _device = d;
                               });
                             },
                             trailing:
-                                _device != null && _device.address == d.address
+                                _device != null && _device!.address == d.address
                                     ? Icon(
                                         Icons.check,
                                         color: Colors.green,
@@ -157,18 +157,18 @@ class _MyHomePageState extends State<MyHomePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        OutlineButton(
+                        OutlinedButton(
                           child: Text('connect'),
                           onPressed: _connected ? null : _onConnect,
                         ),
                         SizedBox(width: 10.0),
-                        OutlineButton(
+                        OutlinedButton(
                           child: Text('disconnect'),
                           onPressed: _connected ? _onDisconnect : null,
                         ),
                       ],
                     ),
-                    OutlineButton(
+                    OutlinedButton(
                       child: Text('Send test data'),
                       onPressed: _connected ? _sendData : null,
                     ),
@@ -183,7 +183,7 @@ class _MyHomePageState extends State<MyHomePage> {
         stream: bluetoothManager.isScanning,
         initialData: false,
         builder: (c, snapshot) {
-          if (snapshot.data) {
+          if (snapshot.data != null) {
             return FloatingActionButton(
               child: Icon(Icons.stop),
               onPressed: () => bluetoothManager.stopScan(),
